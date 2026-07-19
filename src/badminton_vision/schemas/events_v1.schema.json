@@ -1,0 +1,475 @@
+{
+  "$defs": {
+    "FrameObservation": {
+      "description": "Per-frame channel (heavy; optional) that CV increments will populate.",
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "frame": {
+          "title": "Frame",
+          "type": "integer"
+        },
+        "pose_side0": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pose Side0"
+        },
+        "pose_side1": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pose Side1"
+        },
+        "shuttle_visible": {
+          "title": "Shuttle Visible",
+          "type": "boolean"
+        },
+        "shuttle_xy_px": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shuttle Xy Px"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "t_s": {
+          "title": "T S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frame",
+        "t_s",
+        "shuttle_visible",
+        "source"
+      ],
+      "title": "FrameObservation",
+      "type": "object"
+    },
+    "MatchOutcome": {
+      "description": "The outcome channel, separable from the observation stream.",
+      "properties": {
+        "game_scores": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Game Scores"
+        },
+        "winner_side": {
+          "enum": [
+            "side0",
+            "side1"
+          ],
+          "title": "Winner Side",
+          "type": "string"
+        }
+      },
+      "required": [
+        "winner_side"
+      ],
+      "title": "MatchOutcome",
+      "type": "object"
+    },
+    "RallyEvent": {
+      "description": "One rally; deliberately carries no winner/reason \u2014 outcome is match-level only.",
+      "properties": {
+        "rally_idx": {
+          "title": "Rally Idx",
+          "type": "integer"
+        },
+        "shots": {
+          "items": {
+            "$ref": "#/$defs/ShotEvent"
+          },
+          "title": "Shots",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rally_idx",
+        "shots"
+      ],
+      "title": "RallyEvent",
+      "type": "object"
+    },
+    "ShotEvent": {
+      "description": "One stroke; shot_class None means the label was unknown at annotation time.",
+      "properties": {
+        "around_head": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Around Head"
+        },
+        "backhand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backhand"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "coord_space": {
+          "anyOf": [
+            {
+              "enum": [
+                "px",
+                "court_m"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coord Space"
+        },
+        "frame_hit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Hit"
+        },
+        "landing_xy": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Landing Xy"
+        },
+        "rally_idx": {
+          "title": "Rally Idx",
+          "type": "integer"
+        },
+        "receiver_xy": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receiver Xy"
+        },
+        "shot_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Class"
+        },
+        "shot_class_version": {
+          "title": "Shot Class Version",
+          "type": "string"
+        },
+        "shot_idx": {
+          "title": "Shot Idx",
+          "type": "integer"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "striker": {
+          "enum": [
+            "side0",
+            "side1"
+          ],
+          "title": "Striker",
+          "type": "string"
+        },
+        "striker_xy": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Striker Xy"
+        },
+        "t_hit_s": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "T Hit S"
+        }
+      },
+      "required": [
+        "rally_idx",
+        "shot_idx",
+        "striker",
+        "shot_class_version",
+        "source"
+      ],
+      "title": "ShotEvent",
+      "type": "object"
+    },
+    "SourceKind": {
+      "description": "Provenance of a datum: which kind of producer emitted it.",
+      "enum": [
+        "human_annotation",
+        "cv_tracknet",
+        "cv_pose",
+        "cv_fused",
+        "manual_entry"
+      ],
+      "title": "SourceKind",
+      "type": "string"
+    }
+  },
+  "description": "One match's full event record under contract version 1.0.",
+  "properties": {
+    "date": {
+      "format": "date",
+      "title": "Date",
+      "type": "string"
+    },
+    "discipline": {
+      "title": "Discipline",
+      "type": "string"
+    },
+    "frames": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/FrameObservation"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Frames"
+    },
+    "homography": {
+      "anyOf": [
+        {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Homography"
+    },
+    "match_uid": {
+      "title": "Match Uid",
+      "type": "string"
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MatchOutcome"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "rallies": {
+      "items": {
+        "$ref": "#/$defs/RallyEvent"
+      },
+      "title": "Rallies",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "side0_player": {
+      "title": "Side0 Player",
+      "type": "string"
+    },
+    "side1_player": {
+      "title": "Side1 Player",
+      "type": "string"
+    }
+  },
+  "required": [
+    "match_uid",
+    "date",
+    "discipline",
+    "side0_player",
+    "side1_player",
+    "rallies"
+  ],
+  "title": "MatchEventFile",
+  "type": "object"
+}
