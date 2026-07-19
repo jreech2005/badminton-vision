@@ -102,4 +102,37 @@ def cell(frame: pd.DataFrame, row: int | str, col: str) -> float:
     return cast(float, frame.loc[row, col])
 
 
+def make_synthetic_timeline(n_matches: int = 24, strong_period: int = 10) -> pd.DataFrame:
+    """Four MS players; player S wins every match except each strong_period-th."""
+    import datetime as dt
+
+    from badminton_vision.ingest.shuttleset import MATCH_TABLE_COLUMNS
+    from badminton_vision.ingest.timeline import build_timeline
+
+    players = ["S", "P1", "P2", "P3"]
+    rows = []
+    for i in range(n_matches):
+        opponent = players[1 + i % 3]
+        winner, loser = (
+            ("S", opponent) if i % strong_period != strong_period - 1 else (opponent, "S")
+        )
+        rows.append(
+            {
+                "match_uid": f"syn:{i}",
+                "source": "shuttleset",
+                "video": f"syn_{i}",
+                "date": dt.date(2021, 1, 1) + dt.timedelta(days=i),
+                "date_precision": "day",
+                "tournament": "T",
+                "round_name": "Finals",
+                "winner": winner,
+                "loser": loser,
+                "n_sets": 2,
+                "duration_min": None,
+            }
+        )
+    frame = pd.DataFrame(rows, columns=list(MATCH_TABLE_COLUMNS))
+    return build_timeline(frame, seeds={"S": "MS"})
+
+
 __all__ = ["PROVENANCE_COLUMNS", "cell", "make_loader_frame", "write_mini_dataset"]

@@ -1,6 +1,5 @@
 """Harness verification: the coin-flip gate, predict-before-reveal, manifests."""
 
-import datetime as dt
 import json
 from pathlib import Path
 
@@ -20,45 +19,15 @@ from badminton_vision.eval.predictors import (
     make_baseline_predictors,
 )
 from badminton_vision.ingest.pipeline import build_global_timeline
-from badminton_vision.ingest.shuttleset import MATCH_TABLE_COLUMNS
-from badminton_vision.ingest.timeline import build_timeline
-from tests.conftest import cell
+from tests.conftest import cell, make_synthetic_timeline
 
 CONFIG = load_harness_config(paths.CONFIGS_DIR / "harness_v1.yaml")
-
-
-def _synthetic_timeline(n_matches: int = 24, strong_period: int = 10) -> pd.DataFrame:
-    """Four MS players; player S wins every match except each strong_period-th."""
-    players = ["S", "P1", "P2", "P3"]
-    rows = []
-    for i in range(n_matches):
-        opponent = players[1 + i % 3]
-        winner, loser = (
-            ("S", opponent) if i % strong_period != strong_period - 1 else (opponent, "S")
-        )
-        rows.append(
-            {
-                "match_uid": f"syn:{i}",
-                "source": "shuttleset",
-                "video": f"syn_{i}",
-                "date": dt.date(2021, 1, 1) + dt.timedelta(days=i),
-                "date_precision": "day",
-                "tournament": "T",
-                "round_name": "Finals",
-                "winner": winner,
-                "loser": loser,
-                "n_sets": 2,
-                "duration_min": None,
-            }
-        )
-    frame = pd.DataFrame(rows, columns=list(MATCH_TABLE_COLUMNS))
-    return build_timeline(frame, seeds={"S": "MS"})
 
 
 @pytest.mark.unit
 def test_coinflip_brier_exact() -> None:
     # THE harness gate: any per-match Brier != 0.25 means the harness is broken.
-    result = run_walk_forward(_synthetic_timeline(), [CoinFlip()], CONFIG)
+    result = run_walk_forward(make_synthetic_timeline(), [CoinFlip()], CONFIG)
     assert (result.per_match["brier"] == 0.25).all()
     assert result.per_match["brier"].mean() == 0.25
     assert result.summary.loc[0, "brier"] == 0.25
@@ -83,7 +52,7 @@ class _Probe:
 
 @pytest.mark.unit
 def test_predict_precedes_reveal() -> None:
-    timeline = _synthetic_timeline(12)
+    timeline = make_synthetic_timeline(12)
     probe = _Probe()
     run_walk_forward(timeline, [probe], CONFIG)
     # For match k the predictor must have seen exactly k outcomes, never k+1.
@@ -102,18 +71,18 @@ def test_out_of_bounds_prediction_raises() -> None:
             return None
 
     with pytest.raises(DataContractError, match="predicted"):
-        run_walk_forward(_synthetic_timeline(3), [Bad()], CONFIG)
+        run_walk_forward(make_synthetic_timeline(3), [Bad()], CONFIG)
 
 
 @pytest.mark.unit
 def test_duplicate_predictor_names_raise() -> None:
     with pytest.raises(DataContractError, match="duplicate predictor names"):
-        run_walk_forward(_synthetic_timeline(3), [CoinFlip(), CoinFlip()], CONFIG)
+        run_walk_forward(make_synthetic_timeline(3), [CoinFlip(), CoinFlip()], CONFIG)
 
 
 @pytest.mark.unit
 def test_run_writes_parquet_and_manifest(tmp_path: Path) -> None:
-    timeline = _synthetic_timeline(6)
+    timeline = make_synthetic_timeline(6)
     run_dir = tmp_path / "run"
     result = run_walk_forward(
         timeline, [CoinFlip(), EloPredictor(CONFIG.elo)], CONFIG, run_dir=run_dir
@@ -129,7 +98,7 @@ def test_run_writes_parquet_and_manifest(tmp_path: Path) -> None:
 @pytest.mark.unit
 def test_elo_and_log5_beat_coinflip_on_biased_synthetic() -> None:
     # Sanity gate on a deterministic 90%-dominant player, not a statistical claim.
-    timeline = _synthetic_timeline(60, strong_period=10)
+    timeline = make_synthetic_timeline(60, strong_period=10)
     result = run_walk_forward(
         timeline, [EloPredictor(CONFIG.elo), Log5Predictor(CONFIG.log5)], CONFIG
     )
