@@ -12,7 +12,9 @@ from badminton_vision import paths
 from badminton_vision.errors import BadmintonVisionError
 from badminton_vision.eval.harness import load_harness_config, run_walk_forward
 from badminton_vision.eval.metrics import calibration_table, summarize
+from badminton_vision.eval.models import load_models_config
 from badminton_vision.eval.predictors import make_baseline_predictors
+from badminton_vision.experiments.p4a_records import run_p4a
 from badminton_vision.ingest.extract_check import check_raw
 from badminton_vision.ingest.pipeline import build_global_timeline
 from badminton_vision.records.cli import add_records_parser, handle_records
@@ -49,6 +51,26 @@ def _cmd_run(predictor_names: list[str], config_path: Path) -> None:
     scored = result.per_match[result.per_match["scored"]]
     print(f"scored window (both players >= {config.scored_min_history} prior matches):")
     print(summarize(scored).to_string(index=False))
+
+
+def _cmd_experiment(name: str, config_path: Path, models_path: Path) -> None:
+    harness_config = load_harness_config(config_path)
+    models_config = load_models_config(models_path)
+    timeline = build_global_timeline()
+    run_name = dt.datetime.now().strftime("%Y%m%d-%H%M%S") + f"-{name}"
+    _, report = run_p4a(timeline, harness_config, models_config, run_dir=paths.RUNS_DIR / run_name)
+    print(f"run: {run_name} ({len(timeline)} matches)")
+    windows = report["windows"]
+    assert isinstance(windows, dict)
+    for window_name, window in windows.items():
+        print(f"[{window_name}] summary:")
+        print(pd.DataFrame(window["summary"]).to_string(index=False))
+        for contrast, boot in window["contrasts"].items():
+            print(
+                f"  {contrast}: mean Brier diff {boot['mean_diff']:+.4f} "
+                f"[{boot['ci_low']:+.4f}, {boot['ci_high']:+.4f}] p={boot['p_value']:.3f} "
+                f"(n={boot['n_matches']})"
+            )
 
 
 def _cmd_report(run_name: str, config_path: Path) -> None:
@@ -92,6 +114,11 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("--run", default="latest")
     report.add_argument("--config", type=Path, default=paths.CONFIGS_DIR / "harness_v1.yaml")
 
+    experiment = sub.add_parser("experiment", help="preregistered experiments")
+    experiment.add_argument("name", choices=["p4a"])
+    experiment.add_argument("--config", type=Path, default=paths.CONFIGS_DIR / "harness_v1.yaml")
+    experiment.add_argument("--models", type=Path, default=paths.CONFIGS_DIR / "models_v1.yaml")
+
     add_records_parser(sub)
 
     args = parser.parse_args(argv)
@@ -104,6 +131,8 @@ def main(argv: list[str] | None = None) -> int:
             _cmd_run([n.strip() for n in args.predictors.split(",") if n.strip()], args.config)
         elif args.command == "report":
             _cmd_report(args.run, args.config)
+        elif args.command == "experiment":
+            _cmd_experiment(args.name, args.config, args.models)
         elif args.command == "records":
             handle_records(args)
     except BadmintonVisionError as exc:
