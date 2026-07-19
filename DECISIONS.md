@@ -4,6 +4,25 @@ Dated one-paragraph entries for every deviation from the increment plan or
 CLAUDE.md, and for every judgment call a future session must not silently
 reverse. Newest first.
 
+## 2026-07-19 — M2 judgment calls
+
+(1) No BadmintonDB points/stroke loader was built: increment 1 uses BDB for
+match results only and no test or plan requirement needs stroke rows; build it
+when a requirement exists. (2) The events converter emits
+`MatchOutcome.game_scores = None`: `roundscore_*` semantics (pre- vs
+post-rally score) are unverified, and wrong game scores are worse than absent
+ones — resolve semantics before populating. (3) The curated override table's
+`winner` column is a mandatory cross-check against score-walk extraction (a
+disagreement raises), not merely a fallback — stronger than the plan's
+original design. (4) Unit tests may read `configs/*.yaml`: versioned config
+artifacts are code, not data; the "no filesystem beyond tmp_path" rule is
+about `data/` and speed. (5) `DISCIPLINE_SEEDS` carries a third seed
+(Michelle LI, WS) because the real opponent graph has an isolated two-player
+component {KOSETSKAYA, LI}; discipline-by-connectivity needs exactly one seed
+per component. (6) The Sudirman Cup filename week (20) is wrong — the sourced
+date 2019-05-25 is ISO week 21; the override row carries `week_mismatch_ok=yes`
+and the loader enforces that flag for any out-of-week override.
+
 ## 2026-07-19 — Pre-commit uses local `uv run` hooks, not remote mirrors
 
 The ruff/mypy pre-commit hooks are `repo: local` entries running `uv run ruff`
