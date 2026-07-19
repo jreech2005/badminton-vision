@@ -1,0 +1,22 @@
+# Model hyperparameters for the P4a/P4b experiments. LR carries increment-1
+# claims (N~100); XGB is machinery rehearsed for club-scale data (DECISIONS.md).
+version: models_v1
+min_train: 10 # model predictors fall back to 0.5 until this many revealed matches
+clip_eps: 1.0e-6 # keep predicted probabilities inside the open interval
+lr:
+  c: 1.0
+xgb:
+  max_depth: 2
+  n_estimators: 150
+  learning_rate: 0.05
+  min_child_weight: 10
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_lambda: 2.0
+  seed: 7
+# Monotone-increasing constraints: a bigger side0 advantage never lowers P(side0).
+monotone_increasing:
+  - elo_diff
+  - log5_logit
+  - h2h_net_wins
+  - winrate10_diff
