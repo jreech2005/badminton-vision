@@ -15,6 +15,7 @@ from badminton_vision.eval.metrics import calibration_table, summarize
 from badminton_vision.eval.predictors import make_baseline_predictors
 from badminton_vision.ingest.extract_check import check_raw
 from badminton_vision.ingest.pipeline import build_global_timeline
+from badminton_vision.records.cli import add_records_parser, handle_records
 
 
 def _cmd_extract_check() -> None:
@@ -91,6 +92,8 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("--run", default="latest")
     report.add_argument("--config", type=Path, default=paths.CONFIGS_DIR / "harness_v1.yaml")
 
+    add_records_parser(sub)
+
     args = parser.parse_args(argv)
     try:
         if args.command == "extract-check":
@@ -101,6 +104,8 @@ def main(argv: list[str] | None = None) -> int:
             _cmd_run([n.strip() for n in args.predictors.split(",") if n.strip()], args.config)
         elif args.command == "report":
             _cmd_report(args.run, args.config)
+        elif args.command == "records":
+            handle_records(args)
     except BadmintonVisionError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

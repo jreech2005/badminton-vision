@@ -4,6 +4,21 @@ Dated one-paragraph entries for every deviation from the increment plan or
 CLAUDE.md, and for every judgment call a future session must not silently
 reverse. Newest first.
 
+## 2026-07-19 — M4 judgment calls
+
+(1) The increment plan's exit example "gates reject 22-20" is wrong as a
+matter of badminton law: 22-20 is a legal deuce win (20-20, then two clear).
+The gate accepts 22-20/20-22 and the tests pin that; 21-20 and 22-19 remain
+illegal. (2) Name similarity uses stdlib `difflib.SequenceMatcher.ratio()` at
+0.85 on normalized names instead of a Levenshtein dependency — boring option,
+zero deps, same intent. (3) Doubles matches are stored by the DB but
+`as_timeline()` emits singles only: doubles prediction arrives via pair
+composition in a later increment, and emitting half-designed pair rows would
+poison the harness. (4) Same-day rematches log a warning and record anyway —
+rematches are normal in a club night; blocking would corrupt ground truth.
+(5) CSV import auto-creates unknown players (guard still applies) and
+quarantines failing rows with reasons rather than aborting the file.
+
 ## 2026-07-19 — M2 judgment calls
 
 (1) No BadmintonDB points/stroke loader was built: increment 1 uses BDB for
