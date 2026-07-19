@@ -1,0 +1,15 @@
+# Curated day-precision dates for BadmintonDB matches (filenames encode only ISO week).
+# winner is a cross-check against score-walk extraction, and the fallback when
+# extraction is ambiguous. week_mismatch_ok=yes documents rows whose sourced date
+# falls outside the filename's ISO week (dataset filename wart, not a sourcing error).
+# All rows sourced via web search on 2026-07-19; every row carries its provenance URL.
+match_uid,date,winner,week_mismatch_ok,provenance_url,note
+bdb:2018-27,2018-07-05,Kento MOMOTA,,https://olahraga.kompas.com/read/2018/07/05/14094648/kalah-dari-momota-anthony-ginting-terhenti-di-indonesia-open-2018,"Indonesia Open R16; Momota 21-14 21-15"
+bdb:2018-38,2018-09-23,Anthony Sinisuka GINTING,,https://bwfworldtour.bwfbadminton.com/news-single/2018/09/23/dazzling-ginting-stops-momota-finals-victor-china-open-2018,"China Open final; Ginting 23-21 21-19"
+bdb:2019-04,2019-01-25,Kento MOMOTA,,https://bwfworldtourfinals.bwfbadminton.com/news-single/2019/01/25/masterly-momota-dismantles-ginting-indonesia-masters,"Indonesia Masters QF; Momota 21-9 21-10"
+bdb:2019-15,2019-04-14,Kento MOMOTA,,https://bwfworldtour.bwfbadminton.com/news-single/2019/04/14/momota-tai-reign-supreme-singapore-open-singles-finals,"Singapore Open final; Momota 10-21 21-19 21-13"
+bdb:2019-20,2019-05-25,Kento MOMOTA,yes,https://en.wikipedia.org/wiki/2019_Sudirman_Cup_knockout_stage,"Sudirman Cup SF tie Japan-Indonesia; Momota 21-17 21-19; filename week 20 but date is ISO week 21"
+bdb:2019-30,2019-07-26,Kento MOMOTA,,https://en.wikipedia.org/wiki/2019_Japan_Open_(badminton),"Japan Open QF; Momota 21-13 20-22 21-15"
+bdb:2019-38,2019-09-22,Kento MOMOTA,,http://www.xinhuanet.com/english/2019-09/22/c_138412883.htm,"China Open final; Momota 19-21 21-17 21-19"
+bdb:2019-43,2019-10-25,Anthony Sinisuka GINTING,,https://bwfworldtour.bwfbadminton.com/news-single/2019/10/25/ginting-ends-momotas-streak-french-open-day-4,"French Open QF; Ginting 21-10 21-19"
+bdb:2019-50,2019-12-15,Kento MOMOTA,,https://bwfworldtourfinals.bwfbadminton.com/news-single/2019/12/15/king-kento-has-his-11th-crown,"World Tour Finals final; Momota 17-21 21-17 21-14"

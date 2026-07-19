@@ -1,0 +1,7 @@
+# Curated entity resolution: alias -> canonical player name.
+# ShuttleSet and ShuttleSet22 share one naming convention (verified 2026-07-19:
+# 19 shared names, zero variant spellings); only BadmintonDB filename forms differ.
+alias,canonical,source_note
+Anthony Sinisuka GINTING (INA),Anthony Sinisuka GINTING,BadmintonDB filename country suffix
+Kento MOMOTA (JPN),Kento MOMOTA,BadmintonDB filename country suffix
+Kento Momota (JPN),Kento MOMOTA,BadmintonDB casing variant in 2019-43 French Open filename
