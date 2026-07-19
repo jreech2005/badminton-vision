@@ -4,6 +4,26 @@ Dated one-paragraph entries for every deviation from the increment plan or
 CLAUDE.md, and for every judgment call a future session must not silently
 reverse. Newest first.
 
+## 2026-07-19 — M6 judgment calls and findings
+
+(1) P4b headline (preregistered contrasts, elite 94-match timeline): B <= A —
+records+tactical does not detectably beat records-only (lr_b - lr_a: +0.020
+Brier full window, -0.017 scored, CIs straddle zero), and every model loses
+to Elo/log5. Per the master plan this routes tactical/video features to the
+explanation/reporting track, not prediction; lifts under ~0.04 Brier are
+undetectable at this N, so the wording is "no detectable lift", never "no
+lift". (2) The three XGB variants produced bit-identical predictions because
+the preregistered min_child_weight=10 yields 150 trees with only 5 split
+nodes at N~94 — XGB is effectively a base-rate predictor at this scale
+(verified by dumping the booster). Kept as-is: retuning after seeing results
+is the forking-paths failure preregistration exists to prevent. (3) Feature
+denominators chosen where the plan was silent: backhand/aroundhead shares
+use flag-carrying strokes; third-stroke attack rate conditions on own-serve
+rallies reaching stroke 3; serve-conditional features gate on weighted serve
+support. All pinned by hand-computed fixture tests. (4) Calibration ships as
+tables in the report JSON; reliability plots deferred until someone reads
+them (viz group stays optional).
+
 ## 2026-07-19 — M4 judgment calls
 
 (1) The increment plan's exit example "gates reject 22-20" is wrong as a

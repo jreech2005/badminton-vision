@@ -15,8 +15,14 @@ from badminton_vision.eval.metrics import calibration_table, summarize
 from badminton_vision.eval.models import load_models_config
 from badminton_vision.eval.predictors import make_baseline_predictors
 from badminton_vision.experiments.p4a_records import run_p4a
+from badminton_vision.experiments.p4b_rehearsal import load_p4b_config, run_p4b
 from badminton_vision.ingest.extract_check import check_raw
-from badminton_vision.ingest.pipeline import build_global_timeline
+from badminton_vision.ingest.labels import LabelMap
+from badminton_vision.ingest.pipeline import (
+    build_elite_timeline,
+    build_global_timeline,
+    load_elite_strokes,
+)
 from badminton_vision.records.cli import add_records_parser, handle_records
 
 
@@ -53,12 +59,26 @@ def _cmd_run(predictor_names: list[str], config_path: Path) -> None:
     print(summarize(scored).to_string(index=False))
 
 
-def _cmd_experiment(name: str, config_path: Path, models_path: Path) -> None:
+def _cmd_experiment(name: str, config_path: Path, models_path: Path, p4b_config_path: Path) -> None:
     harness_config = load_harness_config(config_path)
     models_config = load_models_config(models_path)
-    timeline = build_global_timeline()
     run_name = dt.datetime.now().strftime("%Y%m%d-%H%M%S") + f"-{name}"
-    _, report = run_p4a(timeline, harness_config, models_config, run_dir=paths.RUNS_DIR / run_name)
+    if name == "p4a":
+        timeline = build_global_timeline()
+        _, report = run_p4a(
+            timeline, harness_config, models_config, run_dir=paths.RUNS_DIR / run_name
+        )
+    else:
+        timeline = build_elite_timeline()
+        _, report = run_p4b(
+            timeline,
+            load_elite_strokes(timeline),
+            LabelMap.load(paths.CONFIGS_DIR / "shot_labels_v1.yaml"),
+            harness_config,
+            models_config,
+            load_p4b_config(p4b_config_path),
+            run_dir=paths.RUNS_DIR / run_name,
+        )
     print(f"run: {run_name} ({len(timeline)} matches)")
     windows = report["windows"]
     assert isinstance(windows, dict)
@@ -115,9 +135,12 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("--config", type=Path, default=paths.CONFIGS_DIR / "harness_v1.yaml")
 
     experiment = sub.add_parser("experiment", help="preregistered experiments")
-    experiment.add_argument("name", choices=["p4a"])
+    experiment.add_argument("name", choices=["p4a", "p4b"])
     experiment.add_argument("--config", type=Path, default=paths.CONFIGS_DIR / "harness_v1.yaml")
     experiment.add_argument("--models", type=Path, default=paths.CONFIGS_DIR / "models_v1.yaml")
+    experiment.add_argument(
+        "--p4b-config", type=Path, default=paths.CONFIGS_DIR / "experiment_p4b_v1.yaml"
+    )
 
     add_records_parser(sub)
 
@@ -132,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "report":
             _cmd_report(args.run, args.config)
         elif args.command == "experiment":
-            _cmd_experiment(args.name, args.config, args.models)
+            _cmd_experiment(args.name, args.config, args.models, args.p4b_config)
         elif args.command == "records":
             handle_records(args)
     except BadmintonVisionError as exc:
