@@ -1,0 +1,75 @@
+# Versioned shot-label contract: every raw token observed in ShuttleSet-family
+# stroke files maps to exactly one canonical class, or is an unknown token.
+# Additive-only: breaking changes go to shot_labels_v2.yaml, never edited here.
+# Token counts verified against extracted data on 2026-07-19.
+version: shot_labels_v1
+unknown_tokens:
+  - 未知球種
+# Policy for unknown strokes (diverges from CoachAI preprocess_data.py, which
+# drops whole rallies — see DECISIONS.md): the stroke is excluded from
+# class-conditional rate features; its rally still counts for rally-level
+# features. Enforced in features/tactical.py, unit-tested.
+unknown_policy:
+  type_conditional_features: exclude_stroke
+  rally_level_features: keep_rally
+classes:
+  short_service:
+    zh: [發短球]
+    group: serve
+  long_service:
+    zh: [發長球]
+    group: serve
+  net_shot:
+    zh: [放小球]
+    group: net
+  return_net:
+    zh: [擋小球]
+    group: net
+  cross_court_net_shot:
+    zh: [勾球]
+    group: net
+  smash:
+    zh: [殺球]
+    group: attack
+  wrist_smash:
+    zh: [點扣]
+    group: attack
+  rush:
+    zh: [撲球]
+    group: attack
+  drop:
+    zh: [切球]
+    group: attack
+  # Data spells this 過度切球 (2,443 strokes across both datasets); the READMEs
+  # spell it 過渡切球. Both map here so either survives a future re-annotation.
+  passive_drop:
+    zh: [過渡切球, 過度切球]
+    group: transition
+  push:
+    zh: [推球]
+    group: transition
+  clear:
+    zh: [長球]
+    group: neutral
+  drive:
+    zh: [平球]
+    group: neutral
+  driven_flight:
+    zh: [小平球]
+    group: neutral
+  back_court_drive:
+    zh: [後場抽平球]
+    group: neutral
+  lob:
+    zh: [挑球]
+    group: defense
+  defensive_return_lob:
+    zh: [防守回挑]
+    group: defense
+  defensive_return_drive:
+    zh: [防守回抽]
+    group: defense
+# BadmintonDB uses its own stroke vocabulary; increment 1 consumes it for
+# match results only, so no mapping exists yet.
+badminton_db_classes:
+  mapping_status: records_only_v1
