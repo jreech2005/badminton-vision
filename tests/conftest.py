@@ -1,6 +1,7 @@
 """Shared synthetic fixture builders; unit tests never touch real data."""
 
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 
@@ -96,4 +97,9 @@ def write_mini_dataset(root: Path, *, float_dates: bool = False, homography: boo
     return set_dir
 
 
-__all__ = ["PROVENANCE_COLUMNS", "make_loader_frame", "write_mini_dataset"]
+def cell(frame: pd.DataFrame, row: int | str, col: str) -> float:
+    """Read one numeric cell; cast around pandas-stubs' wide .loc union type."""
+    return cast(float, frame.loc[row, col])
+
+
+__all__ = ["PROVENANCE_COLUMNS", "cell", "make_loader_frame", "write_mini_dataset"]

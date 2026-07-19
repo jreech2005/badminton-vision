@@ -1,0 +1,19 @@
+# Walk-forward harness configuration. Every constant a model claim depends on
+# lives here, not in code; reruns with the same file are bit-identical.
+version: harness_v1
+seed: 7
+elo:
+  initial: 1500.0
+  scale: 400.0
+  k_provisional: 40.0
+  k_established: 20.0
+  provisional_matches: 10
+log5:
+  prior_wins: 5.0 # Beta(5,5) shrinkage toward 0.5
+  prior_games: 10.0
+  half_life_days: 540
+scored_min_history: 3 # both players need this many prior matches to enter the scored window
+calibration_buckets: 5 # small N: five buckets, not ten
+bootstrap:
+  n_boot: 10000
+  seed: 7
