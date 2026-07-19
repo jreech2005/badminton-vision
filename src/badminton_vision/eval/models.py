@@ -99,7 +99,9 @@ class RefitModelPredictor:
         self._labels.append(result.y)
 
 
-def make_lr_predictor(config: ModelsConfig, feature_columns: Sequence[str]) -> RefitModelPredictor:
+def make_lr_predictor(
+    config: ModelsConfig, feature_columns: Sequence[str], name: str = "lr"
+) -> RefitModelPredictor:
     """L2 logistic regression: median-impute + missingness flags + standardize."""
 
     def build() -> Pipeline:
@@ -111,13 +113,23 @@ def make_lr_predictor(config: ModelsConfig, feature_columns: Sequence[str]) -> R
             ]
         )
 
-    return RefitModelPredictor("lr", feature_columns, build, config.min_train, config.clip_eps)
+    return RefitModelPredictor(name, feature_columns, build, config.min_train, config.clip_eps)
 
 
-def make_xgb_predictor(config: ModelsConfig, feature_columns: Sequence[str]) -> RefitModelPredictor:
-    """Heavily regularized XGBoost with NaN passthrough and monotone constraints."""
+def make_xgb_predictor(
+    config: ModelsConfig,
+    feature_columns: Sequence[str],
+    name: str = "xgb",
+    *,
+    strict_monotone: bool = True,
+) -> RefitModelPredictor:
+    """Heavily regularized XGBoost with NaN passthrough and monotone constraints.
+
+    strict_monotone=False drops constraints naming absent features (the
+    tactical-only feature set has no elo_diff to constrain).
+    """
     unknown = set(config.monotone_increasing) - set(feature_columns)
-    if unknown:
+    if unknown and strict_monotone:
         raise DataContractError(f"monotone constraint on unknown features: {sorted(unknown)}")
     constraints = tuple(
         1 if column in config.monotone_increasing else 0 for column in feature_columns
@@ -139,4 +151,4 @@ def make_xgb_predictor(config: ModelsConfig, feature_columns: Sequence[str]) -> 
             eval_metric="logloss",
         )
 
-    return RefitModelPredictor("xgb", feature_columns, build, config.min_train, config.clip_eps)
+    return RefitModelPredictor(name, feature_columns, build, config.min_train, config.clip_eps)

@@ -1,0 +1,21 @@
+# P4b rehearsal: PREREGISTERED feature sets and contrasts. Changing these after
+# looking at results is the forking-paths failure the preregistration prevents;
+# amendments require a new version file.
+version: experiment_p4b_v1
+tactical:
+  half_life_days: 300.0
+  min_weighted_strokes: 150.0 # below this, every tactical feature is NaN
+  min_weighted_serves: 30.0 # below this, serve-conditional features are NaN
+  shrink_strokes: 30.0 # pseudo-count toward the pooled elite rate
+  shrink_serves: 10.0
+  long_rally_min: 9
+  short_rally_max: 4
+# a = records-only (match_row FEATURE_COLUMNS)
+# b = records + tactical
+# c = tactical-only
+contrasts:
+  - [lr_b, lr_a] # the headline: does tactical add lift over records?
+  - [lr_c, lr_a]
+  - [lr_a, elo]
+  - [lr_b, elo]
+  - [xgb_b, xgb_a]
