@@ -4,6 +4,20 @@ Dated one-paragraph entries for every deviation from the increment plan or
 CLAUDE.md, and for every judgment call a future session must not silently
 reverse. Newest first.
 
+## 2026-07-19 — Feature state updates follow t_idx order, not strictly-earlier days
+
+The increment plan says feature builders use "date < target.date — strictly
+earlier calendar day, never same-day". The implementation instead updates all
+accumulators (Elo, log5, form, h2h, tactical) match-by-match in t_idx order,
+where t_idx sorts by (date, round_rank, match_uid) — so a same-day semi-final
+result IS visible to the same-day final's features. This is causally sound
+(the semi finished before the final started) and matches how the Elo/log5
+baseline predictors accumulate inside the harness, keeping model and baseline
+information sets identical. The residual approximation: same-day same-round
+matches are ordered by match_uid, which is arbitrary. Reversing this (freezing
+features at the day boundary) would also have to freeze the baselines to stay
+comparable; do both together or neither.
+
 ## 2026-07-19 — M6 judgment calls and findings
 
 (1) P4b headline (preregistered contrasts, elite 94-match timeline): B <= A —
