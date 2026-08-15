@@ -1,0 +1,42 @@
+name: Claude Code
+
+# Mention @claude in an issue, a pull request comment, or a review to have
+# Claude read this repository and respond in a comment on the same thread.
+# It reads CLAUDE.md on every run, so the engineering contract (leak firewall,
+# determinism, fail-loud, anti-slop rules) applies to anything it writes.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened]
+
+jobs:
+  claude:
+    # Keeps runners from starting on threads that never mention @claude; the
+    # action checks the trigger phrase again before it responds.
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write # required for the action's default GitHub App auth
+      actions: read # lets Claude read CI results on pull requests
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
