@@ -20,8 +20,6 @@ from badminton_vision.ingest.preoutcome import historical_view
 from badminton_vision.ingest.shuttleset import STROKE_COLUMNS
 from tests.conftest import cell, make_loader_frame, make_synthetic_timeline
 
-pytestmark = pytest.mark.unit
-
 LABELS = LabelMap.load(paths.CONFIGS_DIR / "shot_labels_v1.yaml")
 PARAMS = TacticalParams(
     half_life_days=10.0,
@@ -89,6 +87,7 @@ def _counters(rallies: list[tuple[list[tuple[str, str]], str]]) -> dict[str, Any
     return dict(match_counters(view, "W", "L", LABELS, PARAMS))
 
 
+@pytest.mark.unit
 def test_match_counters_hand_computed() -> None:
     counters = _counters(
         [
@@ -121,6 +120,7 @@ def test_match_counters_hand_computed() -> None:
     assert lo.last_stroke_losses == 0
 
 
+@pytest.mark.unit
 def test_unknown_strokes_leave_class_rates_but_keep_rallies() -> None:
     counters = _counters([([("A", "發短球"), ("B", "未知球種"), ("A", "未知球種")], "A")])
     w = counters["W"]
@@ -130,12 +130,14 @@ def test_unknown_strokes_leave_class_rates_but_keep_rallies() -> None:
     assert w.smash_kills == 0  # unknown final stroke cannot be a smash kill
 
 
+@pytest.mark.unit
 def test_single_stroke_rally_is_a_serve_fault() -> None:
     counters = _counters([([("A", "發短球")], "B")])
     assert counters["W"].serve_faults == 1
     assert counters["L"].receive_rally_wins == 1
 
 
+@pytest.mark.unit
 def test_state_supports_gate_then_decays_below_support() -> None:
     state = TacticalState(LABELS, PARAMS)
     frame = _loader_frame(
@@ -157,6 +159,7 @@ def test_state_supports_gate_then_decays_below_support() -> None:
     assert all(math.isnan(v) for v in at_d20.values())
 
 
+@pytest.mark.unit
 def test_unseen_player_is_all_nan() -> None:
     state = TacticalState(LABELS, PARAMS)
     values = state.features("Nobody", D0)
@@ -175,6 +178,7 @@ def _strokes_for(timeline: pd.DataFrame) -> dict[str, pd.DataFrame]:
     return {str(uid): frame for uid in timeline["match_uid"]}
 
 
+@pytest.mark.unit
 def test_build_tactical_rows_prefix_invariance() -> None:
     timeline = make_synthetic_timeline(12)
     strokes = _strokes_for(timeline)
@@ -183,6 +187,7 @@ def test_build_tactical_rows_prefix_invariance() -> None:
     pd.testing.assert_frame_equal(full.head(6).reset_index(drop=True), prefix)
 
 
+@pytest.mark.unit
 def test_build_tactical_rows_antisymmetry() -> None:
     timeline = make_synthetic_timeline(16)
     strokes = _strokes_for(timeline)
@@ -199,12 +204,14 @@ def test_build_tactical_rows_antisymmetry() -> None:
                 assert b == pytest.approx(-a), f"{column} did not negate on side swap"
 
 
+@pytest.mark.unit
 def test_first_row_has_no_tactical_information() -> None:
     timeline = make_synthetic_timeline(6)
     rows = build_tactical_rows(timeline, _strokes_for(timeline), LABELS, PARAMS, seed=7)
     assert all(math.isnan(cell(rows, 0, column)) for column in TACTICAL_COLUMNS)
 
 
+@pytest.mark.unit
 def test_views_are_the_only_stroke_input() -> None:
     # Leak-guard: match_counters must reject a raw loader frame (players still A/B).
     frame = make_loader_frame()

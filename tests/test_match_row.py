@@ -22,8 +22,6 @@ from badminton_vision.features.match_row import (
 )
 from tests.conftest import cell, make_synthetic_timeline
 
-pytestmark = pytest.mark.unit
-
 CONFIG = load_harness_config(paths.CONFIGS_DIR / "harness_v1.yaml")
 MODELS = load_models_config(paths.CONFIGS_DIR / "models_v1.yaml")
 
@@ -35,6 +33,7 @@ def _rows(n: int = 24, seed: int | None = None) -> pd.DataFrame:
     )
 
 
+@pytest.mark.unit
 def test_prefix_invariance() -> None:
     # Policy: the row for match k must not change when the future is truncated away.
     timeline = make_synthetic_timeline(24)
@@ -43,6 +42,7 @@ def test_prefix_invariance() -> None:
     pd.testing.assert_frame_equal(full.head(8).reset_index(drop=True), prefix)
 
 
+@pytest.mark.unit
 def test_antisymmetry_under_seed_flip() -> None:
     # Policy: swapping side assignment negates every diff feature and flips y.
     first, second = _rows(seed=1), _rows(seed=2)
@@ -62,6 +62,7 @@ def test_antisymmetry_under_seed_flip() -> None:
             assert cell(second, int(i), column) == cell(first, int(i), column)
 
 
+@pytest.mark.unit
 def test_first_meeting_features_are_neutral() -> None:
     rows = _rows()
     assert cell(rows, 0, "elo_diff") == 0.0
@@ -71,6 +72,7 @@ def test_first_meeting_features_are_neutral() -> None:
     assert math.isnan(cell(rows, 0, "winrate10_diff"))
 
 
+@pytest.mark.unit
 def test_h2h_accumulates_with_sign() -> None:
     # S beats P1 at t=0,3,6,... (period 3 rotation); by their third meeting the
     # head-to-head must be +/-2 depending on which side S was assigned.
@@ -84,6 +86,7 @@ def test_h2h_accumulates_with_sign() -> None:
     assert third["h2h_net_wins"] == expected
 
 
+@pytest.mark.unit
 def test_streak_resets_on_direction_change() -> None:
     # Match t=11 is S vs P3. S lost match 9 then won match 10, so a correct
     # reset gives S streak +1 (not 0 or -1+1 bookkeeping); P3 has lost all
@@ -95,6 +98,7 @@ def test_streak_resets_on_direction_change() -> None:
     assert row["streak_diff"] == expected
 
 
+@pytest.mark.unit
 def test_feature_slice_excludes_outcome_and_identity() -> None:
     # Leak-guard: the harness-facing slice carries exactly the feature columns.
     rows = _rows(6)
@@ -105,6 +109,7 @@ def test_feature_slice_excludes_outcome_and_identity() -> None:
     assert "side0" not in example.index
 
 
+@pytest.mark.unit
 def test_model_fallback_before_min_train() -> None:
     timeline = make_synthetic_timeline(30)
     rows = build_match_rows(timeline, CONFIG.elo, CONFIG.log5, CONFIG.seed)
@@ -114,6 +119,7 @@ def test_model_fallback_before_min_train() -> None:
     assert (early["p"] == 0.5).all()
 
 
+@pytest.mark.unit
 def test_lr_learns_on_biased_synthetic() -> None:
     timeline = make_synthetic_timeline(60)
     rows = build_match_rows(timeline, CONFIG.elo, CONFIG.log5, CONFIG.seed)
@@ -123,6 +129,7 @@ def test_lr_learns_on_biased_synthetic() -> None:
     assert cell(summarize(scored).set_index("predictor"), "lr", "brier") < 0.25
 
 
+@pytest.mark.unit
 def test_monotone_constraint_rejects_unknown_feature() -> None:
     bad = MODELS.model_copy(update={"monotone_increasing": ("no_such_feature",)})
     with pytest.raises(DataContractError, match="unknown features"):
