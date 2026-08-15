@@ -5,6 +5,7 @@ db/*.sqlite
 notebooks/
 
 # environments and caches
+.DS_Store
 .venv/
 __pycache__/
 *.pyc
